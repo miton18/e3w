@@ -2,12 +2,15 @@ package e3ch
 
 import (
 	"crypto/tls"
+	"time"
+
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/soyking/e3ch"
 	"github.com/soyking/e3w/conf"
 )
 
+// NewE3chClient create a new E3 client
 func NewE3chClient(config *conf.Config) (*client.EtcdHRCHYClient, error) {
 	var tlsConfig *tls.Config
 	var err error
@@ -24,10 +27,11 @@ func NewE3chClient(config *conf.Config) (*client.EtcdHRCHYClient, error) {
 	}
 
 	clt, err := clientv3.New(clientv3.Config{
-		Endpoints: config.EtcdEndPoints,
-		Username:  config.EtcdUsername,
-		Password:  config.EtcdPassword,
-		TLS:       tlsConfig,
+		DialTimeout: 5 * time.Second,
+		Endpoints:   config.EtcdEndPoints,
+		Username:    config.EtcdUsername,
+		Password:    config.EtcdPassword,
+		TLS:         tlsConfig,
 	})
 	if err != nil {
 		return nil, err
@@ -40,6 +44,7 @@ func NewE3chClient(config *conf.Config) (*client.EtcdHRCHYClient, error) {
 	return client, client.FormatRootKey()
 }
 
+// CloneE3chClient dup etcd client
 func CloneE3chClient(username, password string, client *client.EtcdHRCHYClient) (*client.EtcdHRCHYClient, error) {
 	clt, err := clientv3.New(clientv3.Config{
 		Endpoints: client.EtcdClient().Endpoints(),
